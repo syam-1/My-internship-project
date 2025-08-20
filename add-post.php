@@ -26,21 +26,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Post</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h2>Add a New Blog Post</h2>
-        <form action="add-post.php" method="post">
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="title" required>
-            
-            <label for="content">Content:</label>
-            <textarea id="content" name="content" required></textarea>
-            
-            <input type="submit" value="Submit Post">
-        </form>
-         <p style="text-align: center;"><a href="index.php">Back to Blog</a></p>
+<body class="bg-light">
+    <div class="container mt-5" style="max-width: 800px;">
+        <div class="card p-4">
+            <h2 class="mb-4">Add a New Blog Post</h2>
+            <form action="add-post.php" method="post">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="content" class="form-label">Content</label>
+                    <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Post</button>
+                <a href="index.php" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
     </div>
 </body>
 </html>
