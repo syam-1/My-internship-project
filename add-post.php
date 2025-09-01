@@ -5,18 +5,31 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 include 'db_connect.php';
+$errors = [];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $title = $_POST['title'];
-    $content = $_POST['content'];
-    $stmt = $conn->prepare("INSERT INTO posts (title, content) VALUES (?, ?)");
-    $stmt->bind_param("ss", $title, $content);
-    if ($stmt->execute()) {
-        header("Location: index.php");
-        exit();
-    } else {
-        echo "Error: " . $stmt->error;
+    $title = trim($_POST['title']);
+    $content = trim($_POST['content']);
+
+    // --- Server-Side Validation ---
+    if (empty($title)) {
+        $errors[] = "Title is required.";
     }
-    $stmt->close();
+    if (empty($content)) {
+        $errors[] = "Content is required.";
+    }
+
+    if (empty($errors)) {
+        $stmt = $conn->prepare("INSERT INTO posts (title, content) VALUES (?, ?)");
+        $stmt->bind_param("ss", $title, $content);
+        if ($stmt->execute()) {
+            header("Location: index.php");
+            exit();
+        } else {
+            $errors[] = "Error: " . $stmt->error;
+        }
+        $stmt->close();
+    }
     $conn->close();
 }
 ?>
@@ -32,6 +45,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container mt-5" style="max-width: 800px;">
         <div class="card p-4">
             <h2 class="mb-4">Add a New Blog Post</h2>
+            
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger">
+                    <?php foreach ($errors as $error): ?>
+                        <p class="mb-0"><?php echo $error; ?></p>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <form action="add-post.php" method="post">
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>

@@ -47,7 +47,7 @@ $result = $stmt->get_result();
         <header class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
             <h1 class="h3 mb-0">My Blog</h1>
             <div>
-                <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</span> | 
+                <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?> (<?php echo htmlspecialchars($_SESSION['role']); ?>)!</span> | 
                 <a href="logout.php">Logout</a>
             </div>
         </header>
@@ -74,7 +74,11 @@ $result = $stmt->get_result();
                         <h6 class="card-subtitle mb-2 text-muted">Posted on <?php echo date("F j, Y, g:i a", strtotime($row["created_at"])); ?></h6>
                         <p class="card-text"><?php echo nl2br(htmlspecialchars(substr($row["content"], 0, 200))); ?>...</p>
                         <a href="edit-post.php?id=<?php echo $row['id']; ?>" class="card-link">Edit</a>
-                        <a href="delete-post.php?id=<?php echo $row['id']; ?>" class="card-link text-danger" onclick="return confirm('Are you sure you want to delete this post?');">Delete</a>
+                        
+                        <?php // Check if the user is an admin to show the Delete link ?>
+                        <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
+                            <a href="delete-post.php?id=<?php echo $row['id']; ?>" class="card-link text-danger" onclick="return confirm('Are you sure you want to delete this post?');">Delete</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endwhile; ?>

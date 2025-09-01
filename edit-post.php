@@ -5,21 +5,37 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 include 'db_connect.php';
-// The PHP logic for updating and fetching the post remains the same
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
-    $id = $_POST['id'];
-    $title = $_POST['title'];
-    $content = $_POST['content'];
-    $stmt = $conn->prepare("UPDATE posts SET title = ?, content = ? WHERE id = ?");
-    $stmt->bind_param("ssi", $title, $content, $id);
-    if ($stmt->execute()) {
-        header("Location: index.php");
-        exit();
+$errors = [];
+$post = ['title' => '', 'content' => '']; // Initialize post array
+$id = $_REQUEST['id'] ?? $_GET['id'] ?? null; // Get ID from POST or GET
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $title = trim($_POST['title']);
+    $content = trim($_POST['content']);
+    $post['title'] = $title; // Keep attempted changes in form
+    $post['content'] = $content;
+
+    // --- Server-Side Validation ---
+    if (empty($title)) {
+        $errors[] = "Title is required.";
     }
-    $stmt->close();
-}
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
+    if (empty($content)) {
+        $errors[] = "Content is required.";
+    }
+
+    if (empty($errors)) {
+        $stmt = $conn->prepare("UPDATE posts SET title = ?, content = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $title, $content, $id);
+        if ($stmt->execute()) {
+            header("Location: index.php");
+            exit();
+        } else {
+            $errors[] = "Error updating record.";
+        }
+        $stmt->close();
+    }
+} else {
+    // Fetch existing post data on initial page load
     $stmt = $conn->prepare("SELECT title, content FROM posts WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -44,6 +60,15 @@ if (isset($_GET['id'])) {
     <div class="container mt-5" style="max-width: 800px;">
         <div class="card p-4">
             <h2 class="mb-4">Edit Blog Post</h2>
+
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger">
+                    <?php foreach ($errors as $error): ?>
+                        <p class="mb-0"><?php echo $error; ?></p>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <form action="edit-post.php" method="post">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
                 <div class="mb-3">
