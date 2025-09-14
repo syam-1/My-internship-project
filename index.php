@@ -1,10 +1,7 @@
 <?php
-// All the PHP logic for session, search, and pagination remains the same
+// PHP logic remains the same
 session_start();
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header('Location: login.php');
-    exit;
-}
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) { header('Location: login.php'); exit; }
 include 'db_connect.php';
 $posts_per_page = 5;
 $current_page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -41,10 +38,16 @@ $result = $stmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Blog</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(to right, #e9ecef, #f8f9fa); }
+        .card { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .page-header { padding-bottom: 1rem; border-bottom: 2px solid #dee2e6; }
+    </style>
 </head>
-<body class="bg-light">
+<body>
     <div class="container mt-4">
-        <header class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <header class="page-header d-flex justify-content-between align-items-center mb-4">
             <h1 class="h3 mb-0">My Blog</h1>
             <div>
                 <span>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?> (<?php echo htmlspecialchars($_SESSION['role']); ?>)!</span> | 
@@ -74,8 +77,6 @@ $result = $stmt->get_result();
                         <h6 class="card-subtitle mb-2 text-muted">Posted on <?php echo date("F j, Y, g:i a", strtotime($row["created_at"])); ?></h6>
                         <p class="card-text"><?php echo nl2br(htmlspecialchars(substr($row["content"], 0, 200))); ?>...</p>
                         <a href="edit-post.php?id=<?php echo $row['id']; ?>" class="card-link">Edit</a>
-                        
-                        <?php // Check if the user is an admin to show the Delete link ?>
                         <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin'): ?>
                             <a href="delete-post.php?id=<?php echo $row['id']; ?>" class="card-link text-danger" onclick="return confirm('Are you sure you want to delete this post?');">Delete</a>
                         <?php endif; ?>
